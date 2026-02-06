@@ -16,21 +16,6 @@ export default function Index() {
           <span className="text-2xl font-bold text-white">Spark</span>
         </div>
 
-        {/* Nav Links */}
-        <div className="flex items-center gap-8">
-          <a href="#" className="text-gray-300 hover:text-white transition-colors font-medium">
-            Features
-          </a>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors font-medium">
-            Pricing
-          </a>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors font-medium">
-            About
-          </a>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors font-medium">
-            Docs
-          </a>
-        </div>
 
         {/* Right Side Icons */}
         <div className="flex items-center gap-4">
