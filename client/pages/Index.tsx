@@ -132,7 +132,7 @@ export default function Index() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Pending Request */}
-            <div className="p-4 rounded-lg border border-yellow-500/30 bg-yellow-500/5 backdrop-blur-sm">
+            <div className="p-4 rounded-lg border border-yellow-500/30 bg-yellow-500/5 backdrop-blur-sm animate-scale-in" style={{ animationDelay: '0.9s' }}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
