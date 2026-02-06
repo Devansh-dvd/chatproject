@@ -90,7 +90,7 @@ export default function Index() {
           {/* Channels Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {/* Channel Card 1 */}
-            <div className="p-4 rounded-lg border border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent backdrop-blur-sm hover:border-green-500/50 transition-all duration-300 group cursor-pointer">
+            <div className="p-4 rounded-lg border border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent backdrop-blur-sm hover:border-green-500/50 transition-all duration-300 group cursor-pointer animate-scale-in" style={{ animationDelay: '0.3s' }}>
               <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-400 to-green-600 mb-3 group-hover:shadow-lg group-hover:shadow-green-500/50 transition-all" />
               <h3 className="text-white font-semibold text-sm mb-1">General</h3>
               <p className="text-gray-400 text-xs">1,234 members</p>
