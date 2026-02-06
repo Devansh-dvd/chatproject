@@ -24,6 +24,13 @@ export default function Index() {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
       <SparklingBackground />
 
+      {/* Background Music */}
+      <audio
+        ref={audioRef}
+        loop
+        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+      />
+
       {/* Navbar */}
       <nav className="relative z-20 px-6 py-6 flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
