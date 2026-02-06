@@ -182,7 +182,7 @@ export default function Index() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 mt-8">
+        <div className="flex gap-4 mt-8 animate-fade-in" style={{ animationDelay: '1.2s' }}>
           <button className="flex items-center gap-2 px-6 py-3 rounded-lg border border-green-500/30 bg-green-500/10 text-green-300 font-semibold hover:bg-green-500/20 hover:border-green-500/50 transition-all duration-300 backdrop-blur-sm">
             <LogIn className="w-5 h-5" />
             Join Channel
