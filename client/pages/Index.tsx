@@ -89,8 +89,63 @@ export default function Index() {
           </div>
         </div>
 
+        {/* My Request Status */}
+        <div className="mt-12">
+          <h2 className="text-xl font-bold text-white mb-4">My Request Status</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Pending Request */}
+            <div className="p-4 rounded-lg border border-yellow-500/30 bg-yellow-500/5 backdrop-blur-sm">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-yellow-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-sm">Join Tech Startup</h3>
+                    <p className="text-yellow-300 text-xs">Pending</p>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-400 text-xs">Waiting for admin approval</p>
+            </div>
+
+            {/* Approved Request */}
+            <div className="p-4 rounded-lg border border-green-500/30 bg-green-500/5 backdrop-blur-sm">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                    <Check className="w-5 h-5 text-green-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-sm">Design Community</h3>
+                    <p className="text-green-300 text-xs">Approved</p>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-400 text-xs">Request was approved</p>
+            </div>
+
+            {/* Rejected Request */}
+            <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/5 backdrop-blur-sm">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                    <X className="w-5 h-5 text-red-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-sm">Private Elite Club</h3>
+                    <p className="text-red-300 text-xs">Rejected</p>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-400 text-xs">Does not meet requirements</p>
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
-        <div className="flex gap-4 mt-6">
+        <div className="flex gap-4 mt-8">
           <button className="flex items-center gap-2 px-6 py-3 rounded-lg border border-green-500/30 bg-green-500/10 text-green-300 font-semibold hover:bg-green-500/20 hover:border-green-500/50 transition-all duration-300 backdrop-blur-sm">
             <LogIn className="w-5 h-5" />
             Join Channel
