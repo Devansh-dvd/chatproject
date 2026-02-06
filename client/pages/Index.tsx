@@ -1,5 +1,5 @@
 import { SparklingBackground } from '@/components/sparkling-background';
-import { Zap, Bell, User, Plus, LogIn } from 'lucide-react';
+import { Zap, Bell, User, Plus, LogIn, Clock, Check, X } from 'lucide-react';
 
 export default function Index() {
   return (
