@@ -3,6 +3,23 @@ import { Zap, Bell, User, Plus, LogIn, Clock, Check, X, Volume2, VolumeX } from 
 import { useState, useRef } from 'react';
 
 export default function Index() {
+  const [isMuted, setIsMuted] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isMuted) {
+        audioRef.current.play().catch(() => {
+          // Autoplay may be blocked by browser policy
+          console.log('Autoplay blocked by browser');
+        });
+      } else {
+        audioRef.current.pause();
+      }
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
       <SparklingBackground />
