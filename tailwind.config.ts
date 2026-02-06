@@ -117,6 +117,9 @@ export default {
         pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         glow: "glow 3s ease-in-out infinite",
       },
+      animationDelay: {
+        "2000": "2000ms",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
