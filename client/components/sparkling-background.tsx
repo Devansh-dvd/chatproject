@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 export function SparklingBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -7,7 +7,7 @@ export function SparklingBackground() {
     if (!containerRef.current) return;
 
     const createSparkle = () => {
-      const sparkle = document.createElement('div');
+      const sparkle = document.createElement("div");
 
       // Completely random position across entire viewport
       const x = Math.random() * 100;
