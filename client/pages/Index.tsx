@@ -164,7 +164,7 @@ export default function Index() {
             </div>
 
             {/* Rejected Request */}
-            <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/5 backdrop-blur-sm">
+            <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/5 backdrop-blur-sm animate-scale-in" style={{ animationDelay: '1.1s' }}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
