@@ -1,5 +1,5 @@
 import { SparklingBackground } from '@/components/sparkling-background';
-import { Zap } from 'lucide-react';
+import { Zap, Bell, User, MoreVertical } from 'lucide-react';
 
 export default function Index() {
   return (
