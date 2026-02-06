@@ -28,7 +28,7 @@ export default function Index() {
       <audio
         ref={audioRef}
         loop
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+        src="https://cdn.builder.io/o/assets%2F3bd81cf128ad492aa0b05e212b6311e3%2F72c8f55ba0c345df82ee8e64a3039069?alt=media&token=7d2be1e4-81a4-4ff0-a3a6-8ace6ad34538&apiKey=3bd81cf128ad492aa0b05e212b6311e3"
       />
 
       {/* Navbar */}
