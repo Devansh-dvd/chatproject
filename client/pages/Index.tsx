@@ -55,6 +55,18 @@ export default function Index() {
             <span className="absolute top-1 right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           </button>
 
+          {/* Music Toggle */}
+          <button
+            onClick={toggleMusic}
+            className={`p-2.5 rounded-lg transition-all duration-300 ${
+              isMuted
+                ? 'text-gray-300 hover:text-white hover:bg-green-500/10'
+                : 'text-green-300 bg-green-500/10'
+            }`}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </button>
+
           {/* User Profile */}
           <button className="flex items-center gap-2 p-2 hover:bg-green-500/10 rounded-lg transition-all duration-300">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
