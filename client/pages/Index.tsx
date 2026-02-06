@@ -118,7 +118,7 @@ export default function Index() {
             </div>
 
             {/* Channel Card 5 */}
-            <div className="p-4 rounded-lg border border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent backdrop-blur-sm hover:border-green-500/50 transition-all duration-300 group cursor-pointer">
+            <div className="p-4 rounded-lg border border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent backdrop-blur-sm hover:border-green-500/50 transition-all duration-300 group cursor-pointer animate-scale-in" style={{ animationDelay: '0.7s' }}>
               <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-400 to-teal-600 mb-3 group-hover:shadow-lg group-hover:shadow-green-500/50 transition-all" />
               <h3 className="text-white font-semibold text-sm mb-1">Music</h3>
               <p className="text-gray-400 text-xs">456 members</p>
