@@ -33,7 +33,7 @@ export function SparklingBackground() {
       setTimeout(() => sparkle.remove(), duration * 1000);
     };
 
-    const interval = setInterval(createSparkle, 200);
+    const interval = setInterval(createSparkle, 50);
 
     return () => clearInterval(interval);
   }, []);
