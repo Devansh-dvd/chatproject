@@ -154,6 +154,10 @@ export default {
         sparkle: "sparkle 0.8s ease-out forwards",
         pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         glow: "glow 3s ease-in-out infinite",
+        "fade-in": "fade-in 0.8s ease-out",
+        "slide-in-down": "slide-in-down 0.8s ease-out",
+        "slide-in-up": "slide-in-up 0.8s ease-out",
+        "scale-in": "scale-in 0.8s ease-out",
       },
       animationDelay: {
         "2000": "2000ms",
