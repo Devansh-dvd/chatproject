@@ -32,7 +32,7 @@ export default function Index() {
       />
 
       {/* Navbar */}
-      <nav className="relative z-20 px-6 py-6 flex items-center justify-between max-w-7xl mx-auto">
+      <nav className="relative z-20 px-6 py-6 flex items-center justify-between max-w-7xl mx-auto animate-in fade-in slide-in-from-top duration-700">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/50">
