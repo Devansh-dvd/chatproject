@@ -80,10 +80,42 @@ export default {
             height: "0",
           },
         },
+        sparkle: {
+          "0%": {
+            opacity: "0",
+            transform: "scale(0) translate(0, 0)",
+          },
+          "50%": {
+            opacity: "1",
+          },
+          "100%": {
+            opacity: "0",
+            transform: "scale(1) translate(var(--tx), var(--ty))",
+          },
+        },
+        pulse: {
+          "0%, 100%": {
+            opacity: "0.5",
+          },
+          "50%": {
+            opacity: "1",
+          },
+        },
+        glow: {
+          "0%, 100%": {
+            boxShadow: "0 0 5px rgba(34, 197, 94, 0.5), 0 0 10px rgba(34, 197, 94, 0.3)",
+          },
+          "50%": {
+            boxShadow: "0 0 20px rgba(34, 197, 94, 0.8), 0 0 30px rgba(34, 197, 94, 0.6)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        sparkle: "sparkle 0.8s ease-out forwards",
+        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        glow: "glow 3s ease-in-out infinite",
       },
     },
   },
