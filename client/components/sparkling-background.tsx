@@ -6,23 +6,12 @@ export function SparklingBackground() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    let gridIndex = 0;
-    const gridCols = 10;
-    const gridRows = 10;
-    const cellWidth = 10;
-    const cellHeight = 10;
-
     const createSparkle = () => {
       const sparkle = document.createElement('div');
 
-      // Distribute uniformly across grid
-      const cellX = gridIndex % gridCols;
-      const cellY = Math.floor(gridIndex / gridCols) % gridRows;
-      gridIndex++;
-
-      // Random position within cell + grid offset
-      const x = (cellX * cellWidth) + Math.random() * cellWidth;
-      const y = (cellY * cellHeight) + Math.random() * cellHeight;
+      // Completely random position across entire viewport
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
 
       const size = 3;
       const duration = 0.7;
@@ -47,7 +36,7 @@ export function SparklingBackground() {
       setTimeout(() => sparkle.remove(), duration * 1000);
     };
 
-    const interval = setInterval(createSparkle, 40);
+    const interval = setInterval(createSparkle, 30);
 
     return () => clearInterval(interval);
   }, []);
