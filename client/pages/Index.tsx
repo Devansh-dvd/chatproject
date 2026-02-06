@@ -127,7 +127,7 @@ export default function Index() {
         </div>
 
         {/* My Request Status */}
-        <div className="mt-12">
+        <div className="mt-12 animate-slide-in-up" style={{ animationDelay: '0.8s' }}>
           <h2 className="text-xl font-bold text-white mb-4">My Request Status</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
