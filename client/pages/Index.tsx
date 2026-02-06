@@ -13,7 +13,7 @@ export default function Index() {
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/50">
             <Zap className="w-6 h-6 text-black" />
           </div>
-          <span className="text-2xl font-bold text-white">Spark</span>
+          <span className="text-2xl font-bold text-white">chatsin</span>
         </div>
 
 
