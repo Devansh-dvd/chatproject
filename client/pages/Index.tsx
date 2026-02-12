@@ -15,6 +15,14 @@ import { useState, useRef } from "react";
 
 export default function Index() {
   const [isMuted, setIsMuted] = useState(true);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    username: "",
+    password: "",
+    profilePic: null as File | null,
+    tag: "",
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const toggleMusic = () => {
@@ -29,6 +37,34 @@ export default function Index() {
       }
       setIsMuted(!isMuted);
     }
+  };
+
+  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setProfileData((prev) => ({
+      ...prev,
+      profilePic: file,
+    }));
+  };
+
+  const handleProfileSubmit = () => {
+    console.log("Profile data submitted:", profileData);
+    setIsProfileModalOpen(false);
+    // Reset form
+    setProfileData({
+      username: "",
+      password: "",
+      profilePic: null,
+      tag: "",
+    });
   };
 
   return (
@@ -87,7 +123,10 @@ export default function Index() {
           </button>
 
           {/* User Profile */}
-          <button className="hidden md:flex items-center gap-2 p-2 hover:bg-green-500/10 rounded-lg transition-all duration-300">
+          <button
+            onClick={() => setIsProfileModalOpen(true)}
+            className="hidden md:flex items-center gap-2 p-2 hover:bg-green-500/10 rounded-lg transition-all duration-300"
+          >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
               <User className="w-4 h-4 text-black" />
             </div>
@@ -269,6 +308,112 @@ export default function Index() {
           </button>
         </div>
       </div>
+
+      {/* Profile Modal */}
+      {isProfileModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-xl border border-green-500/30 max-w-md w-full p-6 sm:p-8 shadow-2xl shadow-green-500/20 animate-scale-in">
+            {/* Header */}
+            <div className="mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                Complete Your Profile
+              </h2>
+              <p className="text-gray-400 text-sm">
+                Add your profile information to get started
+              </p>
+            </div>
+
+            {/* Form */}
+            <div className="space-y-4 sm:space-y-5 mb-6">
+              {/* Profile Picture */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Profile Picture
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePicChange}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full p-3 sm:p-4 rounded-lg border-2 border-dashed border-green-500/30 hover:border-green-500/60 bg-green-500/5 hover:bg-green-500/10 transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  <User className="w-5 h-5 text-green-400" />
+                  <span className="text-gray-300 text-sm">
+                    {profileData.profilePic
+                      ? profileData.profilePic.name
+                      : "Choose Image"}
+                  </span>
+                </button>
+              </div>
+
+              {/* Username */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={profileData.username}
+                  onChange={handleProfileInputChange}
+                  placeholder="Enter your username"
+                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={profileData.password}
+                  onChange={handleProfileInputChange}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
+                />
+              </div>
+
+              {/* Tag */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Tag
+                </label>
+                <input
+                  type="text"
+                  name="tag"
+                  value={profileData.tag}
+                  onChange={handleProfileInputChange}
+                  placeholder="Enter your tag (e.g., @developer)"
+                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
+                />
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsProfileModalOpen(false)}
+                className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg border border-green-500/30 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/10 transition-all duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleProfileSubmit}
+                className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
+              >
+                Save Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
