@@ -16,6 +16,7 @@ import { useState, useRef } from "react";
 export default function Index() {
   const [isMuted, setIsMuted] = useState(true);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(false);
   const [profileData, setProfileData] = useState({
     username: "",
     password: "",
@@ -56,7 +57,14 @@ export default function Index() {
   };
 
   const handleProfileSubmit = () => {
-    console.log("Profile data submitted:", profileData);
+    if (isLoginMode) {
+      console.log("Login data submitted:", {
+        username: profileData.username,
+        password: profileData.password,
+      });
+    } else {
+      console.log("Profile data submitted:", profileData);
+    }
     setIsProfileModalOpen(false);
     // Reset form
     setProfileData({
@@ -65,6 +73,7 @@ export default function Index() {
       profilePic: null,
       tag: "",
     });
+    setIsLoginMode(false);
   };
 
   return (
@@ -316,39 +325,43 @@ export default function Index() {
             {/* Header */}
             <div className="mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                Complete Your Profile
+                {isLoginMode ? "Welcome Back" : "Complete Your Profile"}
               </h2>
               <p className="text-gray-400 text-sm">
-                Add your profile information to get started
+                {isLoginMode
+                  ? "Login to your account"
+                  : "Add your profile information to get started"}
               </p>
             </div>
 
             {/* Form */}
             <div className="space-y-4 sm:space-y-5 mb-6">
-              {/* Profile Picture */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Profile Picture
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfilePicChange}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full p-3 sm:p-4 rounded-lg border-2 border-dashed border-green-500/30 hover:border-green-500/60 bg-green-500/5 hover:bg-green-500/10 transition-all duration-300 flex items-center justify-center gap-2"
-                >
-                  <User className="w-5 h-5 text-green-400" />
-                  <span className="text-gray-300 text-sm">
-                    {profileData.profilePic
-                      ? profileData.profilePic.name
-                      : "Choose Image"}
-                  </span>
-                </button>
-              </div>
+              {/* Profile Picture - Only in Sign Up mode */}
+              {!isLoginMode && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Profile Picture
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePicChange}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full p-3 sm:p-4 rounded-lg border-2 border-dashed border-green-500/30 hover:border-green-500/60 bg-green-500/5 hover:bg-green-500/10 transition-all duration-300 flex items-center justify-center gap-2"
+                  >
+                    <User className="w-5 h-5 text-green-400" />
+                    <span className="text-gray-300 text-sm">
+                      {profileData.profilePic
+                        ? profileData.profilePic.name
+                        : "Choose Image"}
+                    </span>
+                  </button>
+                </div>
+              )}
 
               {/* Username */}
               <div>
@@ -380,24 +393,26 @@ export default function Index() {
                 />
               </div>
 
-              {/* Tag */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Tag
-                </label>
-                <input
-                  type="text"
-                  name="tag"
-                  value={profileData.tag}
-                  onChange={handleProfileInputChange}
-                  placeholder="Enter your tag (e.g., @developer)"
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
-                />
-              </div>
+              {/* Tag - Only in Sign Up mode */}
+              {!isLoginMode && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Tag
+                  </label>
+                  <input
+                    type="text"
+                    name="tag"
+                    value={profileData.tag}
+                    onChange={handleProfileInputChange}
+                    placeholder="Enter your tag (e.g., @developer)"
+                    className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 mb-4">
               <button
                 onClick={() => setIsProfileModalOpen(false)}
                 className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg border border-green-500/30 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/10 transition-all duration-300"
@@ -408,8 +423,21 @@ export default function Index() {
                 onClick={handleProfileSubmit}
                 className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
               >
-                Save Profile
+                {isLoginMode ? "Login" : "Save Profile"}
               </button>
+            </div>
+
+            {/* Toggle Link */}
+            <div className="text-center">
+              <p className="text-gray-400 text-sm">
+                {isLoginMode ? "Don't have an account? " : "Already have an account? "}
+                <button
+                  onClick={() => setIsLoginMode(!isLoginMode)}
+                  className="text-green-400 hover:text-green-300 font-semibold transition-colors duration-300"
+                >
+                  {isLoginMode ? "Sign Up" : "Login"}
+                </button>
+              </p>
             </div>
           </div>
         </div>
