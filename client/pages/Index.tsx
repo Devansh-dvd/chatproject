@@ -56,25 +56,33 @@ export default function Index() {
     }));
   };
 
-  const handleProfileSubmit = () => {
-    if (isLoginMode) {
-      console.log("Login data submitted:", {
-        username: profileData.username,
-        password: profileData.password,
-      });
-    } else {
-      console.log("Profile data submitted:", profileData);
-    }
-    setIsProfileModalOpen(false);
-    // Reset form
-    setProfileData({
-      username: "",
-      password: "",
-      profilePic: null,
-      tag: "",
+  const handleProfileSubmit = async () => {
+  if (!profileData.username || !profileData.password || !profileData.profilePic || !profileData.tag) {
+    alert("All details must be filled");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("username", profileData.username);
+  formData.append("password", profileData.password);
+  formData.append("tag", profileData.tag);
+  formData.append("profilePic", profileData.profilePic!); // profilePic should be a File
+
+  try {
+    const res = await fetch("/api/users/loginuser", {
+      method: "POST",
+      body: formData,
     });
-    setIsLoginMode(false);
-  };
+
+    const data = await res.json();
+    console.log(data);
+    alert("Profile submitted successfully!");
+    setIsProfileModalOpen(false);
+  } catch (error) {
+    console.log("Error:", error);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
@@ -133,7 +141,9 @@ export default function Index() {
 
           {/* User Profile */}
           <button
-            onClick={() => setIsProfileModalOpen(true)}
+            onClick={() => {
+              setIsProfileModalOpen(true);
+            }}
             className="hidden md:flex items-center gap-2 p-2 hover:bg-green-500/10 rounded-lg transition-all duration-300"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
@@ -423,7 +433,7 @@ export default function Index() {
                 onClick={handleProfileSubmit}
                 className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
               >
-                {isLoginMode ? "Login" : "Save Profile"}
+                Submit
               </button>
             </div>
 
