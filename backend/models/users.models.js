@@ -15,10 +15,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    profilePicture: {
+    ProfilePicture: {
       type: String,
       required: true,
     },
+    channels: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Channel",
+      default: []
+    }
+  ],
     refreshToken: {
       type: String,
     },

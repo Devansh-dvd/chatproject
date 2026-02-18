@@ -23,7 +23,6 @@ const generateaccessrefreshToken = async (userid) =>{
 const registerUser = async (req, res) =>{
 
         const {username, password, tags} = req.body;
-        const { profilePicture } = req.file;
         
         const existedUser = await User.findOne({
         $or: [{ username },{ tags }]
@@ -35,5 +34,9 @@ const registerUser = async (req, res) =>{
             message: "Username or tags already exists"
         })
     }
+
+    const ProfilePicturepath = req.files.ProfilePicture[0].path;
+
+
 }
 
