@@ -14,3 +14,8 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+import userRouter from "./routes/user.routes.js";
+
+app.use("/api/users/", userRouter);
+
+export default { app }

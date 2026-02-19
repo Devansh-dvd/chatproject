@@ -25,6 +25,7 @@
     "dotenv": "^17.3.1",
     "express": "^5.1.0",
     "multer": "^2.0.2",
+    "router": "^2.2.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

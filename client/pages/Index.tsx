@@ -69,7 +69,7 @@ export default function Index() {
   formData.append("profilePic", profileData.profilePic!); // profilePic should be a File
 
   try {
-    const res = await fetch("/api/users/loginuser", {
+    const res = await fetch("/api/users/registeruser", {
       method: "POST",
       body: formData,
     });
