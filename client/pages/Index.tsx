@@ -66,23 +66,61 @@ export default function Index() {
   formData.append("username", profileData.username);
   formData.append("password", profileData.password);
   formData.append("tag", profileData.tag);
-  formData.append("profilePic", profileData.profilePic!); // profilePic should be a File
+  formData.append("profilePic", profileData.profilePic);
 
   try {
-    const res = await fetch("/api/users/registeruser", {
+    const res = await fetch("http://localhost:8000/api/users/registeruser", {
       method: "POST",
       body: formData,
+      credentials: "include", 
     });
 
     const data = await res.json();
-    console.log(data);
+
+    if (!res.ok) {
+      alert(data.message || "Something went wrong");
+      return;
+    }
+
     alert("Profile submitted successfully!");
-    setIsProfileModalOpen(false);
+    setIsProfileModalOpen(false);  
+
   } catch (error) {
     console.log("Error:", error);
   }
 };
 
+const loginprofile = async () => {
+  if (!profileData.username || !profileData.password) {
+    alert("Username and password are required");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("username", profileData.username);
+  formData.append("password", profileData.password);
+
+  try {
+    const res = await fetch("http://localhost:8000/api/users/loginuser", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Login failed");
+      return;
+    }
+
+    alert("Login successful!");
+    setIsProfileModalOpen(false);   
+
+  } catch (error) {
+    console.log("Error logging in:", error);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
@@ -430,7 +468,8 @@ export default function Index() {
                 Cancel
               </button>
               <button
-                onClick={handleProfileSubmit}
+                onClick={isLoginMode ? loginprofile : handleProfileSubmit}
+
                 className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
               >
                 Submit
