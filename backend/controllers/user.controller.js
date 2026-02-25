@@ -25,10 +25,10 @@ const generateaccessrefreshToken = async (userid) =>{
 
 const registerUser = async (req, res) =>{
 
-        const {username, password, tags} = req.body;
+        const {username, password, tag} = req.body;
         
         const existedUser = await User.findOne({
-        $or: [{ username },{ tags }]
+        $or: [{ username },{ tag }]
     })
 
     if(existedUser){
@@ -38,15 +38,15 @@ const registerUser = async (req, res) =>{
         })
     }
 
-    const ProfilePicturepath = req.files.ProfilePicture[0].path;
+    const ProfilePicturepath = req.files.profilePic[0].path;
 
     const profilepic = await uploadoncloudinary(ProfilePicturepath);
     
     const user = await User.create({
-        username,
-        password,
-        tags,
-        profilepic: profilepic?.url || ""
+        username : username,
+        password : password,
+        tags : tag,
+        ProfilePicture: profilepic?.url || ""
     })
 
     const createduser = await User.findById(user._id).select("-password -refreshToken");
