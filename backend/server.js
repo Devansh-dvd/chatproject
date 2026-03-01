@@ -1,20 +1,17 @@
-import express from "express";
-import cors from "cors";
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
-import userRouter from "./routes/user.routes.js";
+import dotenv from "dotenv";
+import connectDB from "./db/index.js";
+import app from "./app.js";   
 
-const app = express();
-const PORT = process.env.PORT || 8000;
+dotenv.config({
+    path: "./.env"
+});
 
-app.use(cors({
-    origin : process.env.CORS_ORIGIN,
-    credentials : true
-}));
-
-app.use(bodyParser.json());
-app.use(cookieParser());
-
-app.use("/api/users/", userRouter);
-
-export default app; 
+connectDB()
+.then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+        console.log(`Server running on port ${process.env.PORT || 8000}`);
+    });
+})
+.catch((err) => {
+    console.log("DB connection failed:", err);
+});

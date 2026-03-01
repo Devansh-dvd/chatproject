@@ -1,162 +1,180 @@
-import {User} from "../models/user.model.js";
+import { User } from "../models/users.models.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { uploadoncloudinary } from "../utils/cloudinary.js";
-import ApiError from "../utils/ApiError.js";
-import ApiResponse from "../utils/ApiResponse.js";
+import ApiError from "../apierror.js";
+import ApiResponse from "../apiresponse.js";
 
-const generateaccessrefreshToken = async (userid) =>{
-    try{
+/* ================= TOKEN GENERATION ================= */
+
+const generateAccessRefreshToken = async (userid) => {
+  try {
     const user = await User.findById(userid);
-    const accesstoken = user.generateAccessToken();       
-     const refreshtoken = user.generateRefreshToken();   
 
-    user.refreshToken = refreshtoken;
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
 
-    await user.save({validateBeforeSave: false});
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
 
-    return {accesstoken , refreshtoken};
-    }
-    catch(error){
-        console.log("Error generating tokens:", error);
-        throw error;
-    }
-}
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(500, "Token generation failed");
+  }
+};
 
-const registerUser = async (req, res) =>{
+/* ================= REGISTER USER ================= */
 
-        const {username, password, tag} = req.body;
-        
-        const existedUser = await User.findOne({
-        $or: [{ username },{ tag }]
-    })
+const registerUser = async (req, res) => {
+  const { username, password, tag } = req.body;
 
-    if(existedUser){
-        return res.status(400).json({
-            success: false,
-            message: "Username or tags already exists"
-        })
-    }
+  if (!username || !password || !tag) {
+    throw new ApiError(400, "All fields are required");
+  }
 
-    const ProfilePicturepath = req.files.profilePic[0].path;
+  const existedUser = await User.findOne({
+    $or: [{ username }, { tags: tag }],
+  });
 
-    const profilepic = await uploadoncloudinary(ProfilePicturepath);
-    
-    const user = await User.create({
-        username : username,
-        password : password,
-        tags : tag,
-        ProfilePicture: profilepic?.url || ""
-    })
+  if (existedUser) {
+    throw new ApiError(400, "Username or tag already exists");
+  }
 
-    const createduser = await User.findById(user._id).select("-password -refreshToken");
+  /* 🔥 FILE VALIDATION (important fix) */
+  if (!req.file) {
+    throw new ApiError(400, "Profile picture is required");
+  }
 
-    if(!createduser){
-        throw new ApiError(500,"User creation failed")
-    }
-    else{
-const { accessToken, refreshToken } =
-    await generateaccessrefreshToken(createduser._id);
+  const profilePicPath = req.file.path;
 
-return res.status(201).json(
+  const uploadedImage = await uploadoncloudinary(profilePicPath);
+
+  if (!uploadedImage?.url) {
+    throw new ApiError(500, "Image upload failed");
+  }
+
+  const user = await User.create({
+    username,
+    password,
+    tags: tag,
+    ProfilePicture: uploadedImage.url,
+  });
+
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  const { accessToken, refreshToken } =
+    await generateAccessRefreshToken(createdUser._id);
+
+  return res.status(201).json(
     new ApiResponse(
-        200,
-        {
-            user: createduser,
-            accessToken,
-            refreshToken
-        },
-        "User registered successfully"
+      201,
+      {
+        user: createdUser,
+        accessToken,
+        refreshToken,
+      },
+      "User registered successfully"
     )
-)}}
+  );
+};
 
-const loginUser = (async (req, res) =>{
-    const {username, password} = req.body
+/* ================= LOGIN USER ================= */
 
-    const user = await User.findOne({username})
+const loginUser = async (req, res) => {
+  const { username, password } = req.body;
 
-     if (!user) {
-        throw new ApiError(404, "User does not exist")
-    }
+  const user = await User.findOne({ username });
 
-    if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid user credentials")
-    }
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
 
-   const {accessToken, refreshToken} = await generateaccessrefreshToken(user._id)
+  const isPasswordValid = await user.isPasswordCorrect(password);
 
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid credentials");
+  }
 
-    return res.status(200).json(
-        new ApiResponse(
-            200,
-            {
-                user: loggedInUser,
-                accessToken,
-                refreshToken
-            },
-            "User logged in successfully"
-        )
+  const { accessToken, refreshToken } =
+    await generateAccessRefreshToken(user._id);
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        user: loggedInUser,
+        accessToken,
+        refreshToken,
+      },
+      "User logged in successfully"
     )
-})
+  );
+};
 
- const getCurrentUser = async(req, res) =>{
-    return res.status(200).json(
-        new ApiResponse(
-            200,
-            req.user,
-            "Current user fetched successfully"
-        )
-    )
- }
+/* ================= CURRENT USER ================= */
 
- const updateProfilePicture = async (req, res) =>{
-    const profilepicpath = req.file?.path;
-    if(!profilepicpath){
-        throw new ApiError(400, "Profile picture is required")
- }
-    const profilepic = await uploadoncloudinary(profilepicpath);
-    if(!profilepic.url){
-        throw new ApiError(500, "Failed to upload profile picture")
-    }
+const getCurrentUser = async (req, res) => {
+  return res.status(200).json(
+    new ApiResponse(200, req.user, "Current user fetched successfully")
+  );
+};
 
-    const user = await User.findByIdAndUpdate(
-        req.user._id,
-        {
-            $set: {
-                ProfilePicture: profilepic.url
-            }
-        },
-        { new: true }
-    ).select("-password");
+/* ================= UPDATE PROFILE PICTURE ================= */
 
-    return res.status(200).json(
-        new ApiResponse(
-            200,
-            user,
-            "Profile picture updated successfully"
-        )
-    )}
+const updateProfilePicture = async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, "Profile picture is required");
+  }
 
-    const getUserprofile = async (req, res) =>{
-        const{username} = req.params;
+  const uploadedImage = await uploadoncloudinary(req.file.path);
 
-         if (!username?.trim()) {
-        throw new ApiError(400, "username is missing")
-    }
+  if (!uploadedImage?.url) {
+    throw new ApiError(500, "Image upload failed");
+  }
 
-    const userprofile = await User.findOne({username}).select("-password -refreshToken");
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { ProfilePicture: uploadedImage.url } },
+    { new: true }
+  ).select("-password -refreshToken");
 
-    if(!userprofile){
-        throw new ApiError(404, "User not found")
-    }
-    return res.status(200).json(
-        new ApiResponse(
-            200,
-            userprofile,
-            "User profile fetched successfully"
-        )
-    )
-}
+  return res.status(200).json(
+    new ApiResponse(200, user, "Profile picture updated successfully")
+  );
+};
 
-export{registerUser, loginUser, getCurrentUser, updateProfilePicture, getUserprofile}
+/* ================= GET USER PROFILE ================= */
+
+const getUserprofile = async (req, res) => {
+  const { username } = req.params;
+
+  if (!username?.trim()) {
+    throw new ApiError(400, "Username is missing");
+  }
+
+  const userProfile = await User.findOne({ username }).select(
+    "-password -refreshToken"
+  );
+
+  if (!userProfile) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, userProfile, "User profile fetched successfully")
+  );
+};
+
+export {
+  registerUser,
+  loginUser,
+  getCurrentUser,
+  updateProfilePicture,
+  getUserprofile,
+};

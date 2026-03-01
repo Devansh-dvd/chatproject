@@ -1,12 +1,13 @@
 import {Router} from 'express';
 import {registerUser, loginUser, getCurrentUser, updateProfilePicture, getUserprofile}from '../controllers/user.controller.js';
-import {upload} from '../middlewares/multer.js';
+import {upload} from '../middlewares/multer.middleware.js';
 
 const router = Router();
 
-router.route("/registeruser").post(upload.fields([
-    {name: "profilePic", maxCount: 1},
-]), registerUser);
+router.route("/registeruser").post(
+  upload.single("profilePic"),
+  registerUser
+);
 
 router.route("/loginuser").post(loginUser);
 

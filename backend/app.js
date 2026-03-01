@@ -1,22 +1,22 @@
-// entry file of backend application
 
-import dotenv from "dotenv";
-import connectDB from "./db/index.js";
 import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import userRouter from "./routes/user.routes.js";
 
 const app = express();
 
-dotenv.config({
-    path: "./.env"
-});
+app.use(cors({
+  origin: process.env.CORS_ORIGIN,
+  credentials: true
+}));
 
-connectDB()
-.then(() =>{
-    app.listen(process.env.PORT || 8000, () =>{
-        console.log(`Server is running on port ${process.env.PORT || 8000}`);
-    })
-})
-.catch((err) => {
-    console.log("Error connecting to database:", err);
-})
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(cookieParser());
+
+app.use("/api/users", userRouter);
+
+export default app;
