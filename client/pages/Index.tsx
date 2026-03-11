@@ -151,7 +151,8 @@ const loginprofile = async () => {
     alert("Login successful!");
     setUser(data.data.user);
   } catch (error) {
-    console.log("Error logging in:", error);
+    alert("Invalid Credentials");
+    console.log("Error:", error);
   }
 };
   return (
