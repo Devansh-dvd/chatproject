@@ -1,4 +1,5 @@
 import { SparklingBackground } from "@/components/sparkling-background";
+import { set } from "date-fns";
 import {
   Zap,
   Bell,
@@ -14,6 +15,7 @@ import {
 import { useState, useRef } from "react";
 
 export default function Index() {
+  const[user, setUser] = useState(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(false);
@@ -57,7 +59,12 @@ export default function Index() {
   };
 
   const handleProfileSubmit = async () => {
-  if (!profileData.username || !profileData.password || !profileData.profilePic || !profileData.tag) {
+  if (
+    !profileData.username ||
+    !profileData.password ||
+    !profileData.profilePic ||
+    !profileData.tag
+  ) {
     alert("All details must be filled");
     return;
   }
@@ -69,41 +76,59 @@ export default function Index() {
   formData.append("profilePic", profileData.profilePic);
 
   try {
-    const res = await fetch("http://localhost:8000/api/users/registeruser", {
-      method: "POST",
-      body: formData,
-      credentials: "include", 
-    });
+    const res = await fetch(
+      "http://localhost:8000/api/users/registeruser",
+      {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      }
+    );
 
     const data = await res.json();
+    console.log(data);
 
     if (!res.ok) {
       alert(data.message || "Something went wrong");
       return;
     }
 
-    alert("Profile submitted successfully!");
-    setIsProfileModalOpen(false);  
+    localStorage.setItem("userid", data.data.user._id);
 
+    setUser(data.data.user);
+
+    setIsProfileModalOpen(false);
+
+    setProfileData({
+      username: "",
+      password: "",
+      profilePic: null,
+      tag: "",
+    });
+
+    setIsLoginMode(false);
+
+    alert("User registered successfully!");
   } catch (error) {
     console.log("Error:", error);
   }
 };
-
 const loginprofile = async () => {
   if (!profileData.username || !profileData.password) {
     alert("Username and password are required");
     return;
   }
 
-  const formData = new FormData();
-  formData.append("username", profileData.username);
-  formData.append("password", profileData.password);
-
   try {
     const res = await fetch("http://localhost:8000/api/users/loginuser", {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: profileData.username,
+        password: profileData.password,
+      }),
       credentials: "include",
     });
 
@@ -114,14 +139,21 @@ const loginprofile = async () => {
       return;
     }
 
-    alert("Login successful!");
-    setIsProfileModalOpen(false);   
+    setIsProfileModalOpen(false);
 
+    setProfileData({
+      username: "",
+      password: "",
+      profilePic: null,
+      tag: "",
+    });
+
+    alert("Login successful!");
+    setUser(data.data.user);
   } catch (error) {
     console.log("Error logging in:", error);
   }
 };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
       <SparklingBackground />
@@ -178,20 +210,32 @@ const loginprofile = async () => {
           </button>
 
           {/* User Profile */}
-          <button
-            onClick={() => {
-              setIsProfileModalOpen(true);
-            }}
-            className="hidden md:flex items-center gap-2 p-2 hover:bg-green-500/10 rounded-lg transition-all duration-300"
-          >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-              <User className="w-4 h-4 text-black" />
-            </div>
-            <span className="text-gray-300 text-sm font-medium">Profile</span>
-          </button>
+       <button
+          onClick={() => setIsProfileModalOpen(true)}
+        className="hidden md:flex items-center gap-2 p-2 hover:bg-green-500/10 rounded-lg transition-all duration-300"
+        >
+  {user ? (
+    <>
+      <img
+        src={user.ProfilePicture}
+        className="w-10 h-10 rounded-full object-cover"
+      />
+      <span className="text-gray-300 text-sm font-medium">
+        {user.username}
+      </span>
+    </>
+  ) : (
+    <>
+      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+        <User className="w-4 h-4 text-black" />
+      </div>
+      <span className="text-gray-300 text-sm font-medium">Profile</span>
+    </>
+  )}
+</button>
 
           {/* CTA Button */}
-          <button className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105">
+          <button className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"  onClick={() => setIsProfileModalOpen(true)}>
             Get Started
           </button>
         </div>
