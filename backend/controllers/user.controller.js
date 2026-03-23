@@ -1,6 +1,4 @@
 import { User } from "../models/users.models.js";
-import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
 import { uploadoncloudinary } from "../utils/cloudinary.js";
 import ApiError from "../apierror.js";
 import ApiResponse from "../apiresponse.js";
