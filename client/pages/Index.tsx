@@ -12,6 +12,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 
 export default function Index() {
   const [user, setUser] = useState(null);
@@ -210,9 +211,11 @@ export default function Index() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <a href="#" className="hidden sm:inline-block px-3 sm:px-4 py-2 text-gray-300 hover:text-white hover:bg-green-500/10 rounded-lg transition-all duration-300 font-medium text-sm">
+          <Link to="/my-channels" className="hidden sm:inline-block px-3 sm:px-4 py-2 text-gray-300 hover:text-white hover:bg-green-500/10 rounded-lg transition-all duration-300 font-medium text-sm"
+          state={{ user }}
+          >
             My Channels
-          </a>
+          </Link>
           <button className="relative p-2.5 text-gray-300 hover:text-white hover:bg-green-500/10 rounded-lg transition-all duration-300">
             <Bell className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse" />

@@ -6,7 +6,7 @@ import ApiResponse from "../apiresponse.js"
 
 export const createChannel = async (req, res) => {
   try {
-    const { name, description, adminId } = req.body;
+   const { channelname: name, description, admin: adminId } = req.body;
 
     if (!name || !description || !adminId) {
       return res.status(400).json({
