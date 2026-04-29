@@ -1,8 +1,8 @@
-
 import {Channel} from "../models/channels.models.js"
 import { uploadoncloudinary } from "../utils/cloudinary.js"
 import ApiError from "../apierror.js"
 import ApiResponse from "../apiresponse.js" 
+import { User } from "../models/users.models.js";
 
 export const createChannel = async (req, res) => {
   try {
@@ -34,6 +34,11 @@ export const createChannel = async (req, res) => {
       adminId,
     });
 
+    // Update the admin user's channels array
+    await User.findByIdAndUpdate(adminId, {
+      $push: { channels: channel._id }
+    });
+
     return res.status(201).json(
       new ApiResponse(201, channel, "Channel created successfully")
     );
@@ -42,4 +47,24 @@ export const createChannel = async (req, res) => {
       new ApiError(500, "Channel creation failed")
     );
   }
+};
+
+export const getChannelById = async (req, res) => {
+  try {
+    const channelId = req.params.id;
+    const channel = await Channel.findById(channelId);
+
+    if (!channel) {
+      return res.status(404).json(
+        new ApiError(404, "Channel not found")
+      );
+    }
+    return res.status(200).json(
+      new ApiResponse(200, channel, "Channel retrieved successfully")
+    );
+  } catch (error) {
+    return res.status(500).json(
+      new ApiError(500, "Failed to retrieve channel")
+    );
+  } 
 };

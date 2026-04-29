@@ -186,7 +186,9 @@ export default function Index() {
       setIsChannelModalOpen(false);
       setChannelData({ channelname: "", admin: user?._id || "", groupicon: null, description: "" });
       alert("Channel created successfully!");
-    } catch (error) {
+      user && setUser({...user,channels: [...(user.channels || []), data.data.channel._id]});
+    } 
+    catch (error) {
       console.log("Error:", error);
     }
   };
