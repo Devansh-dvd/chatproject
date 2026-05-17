@@ -3,7 +3,6 @@ import { uploadoncloudinary } from "../utils/cloudinary.js";
 import ApiError from "../apierror.js";
 import ApiResponse from "../apiresponse.js";
 
-/* ================= TOKEN GENERATION ================= */
 
 const generateAccessRefreshToken = async (userid) => {
   try {
@@ -21,8 +20,6 @@ const generateAccessRefreshToken = async (userid) => {
   }
 };
 
-/* ================= REGISTER USER ================= */
-
 const registerUser = async (req, res) => {
   const { username, password, tag } = req.body;
 
@@ -38,7 +35,6 @@ const registerUser = async (req, res) => {
     throw new ApiError(400, "Username or tag already exists");
   }
 
-  /* 🔥 FILE VALIDATION (important fix) */
   if (!req.file) {
     throw new ApiError(400, "Profile picture is required");
   }
@@ -78,8 +74,6 @@ const registerUser = async (req, res) => {
   );
 };
 
-/* ================= LOGIN USER ================= */
-
 const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
@@ -115,15 +109,11 @@ const loginUser = async (req, res) => {
   );
 };
 
-/* ================= CURRENT USER ================= */
-
 const getCurrentUser = async (req, res) => {
   return res.status(200).json(
     new ApiResponse(200, req.user, "Current user fetched successfully")
   );
 };
-
-/* ================= UPDATE PROFILE PICTURE ================= */
 
 const updateProfilePicture = async (req, res) => {
   if (!req.file) {
@@ -146,8 +136,6 @@ const updateProfilePicture = async (req, res) => {
     new ApiResponse(200, user, "Profile picture updated successfully")
   );
 };
-
-/* ================= GET USER PROFILE ================= */
 
 const getUserprofile = async (req, res) => {
   const { username } = req.params;

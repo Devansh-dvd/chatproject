@@ -3,6 +3,7 @@ import { uploadoncloudinary } from "../utils/cloudinary.js"
 import ApiError from "../apierror.js"
 import ApiResponse from "../apiresponse.js" 
 import { User } from "../models/users.models.js";
+import { Alchan } from "../models/alchan.models.js";
 
 export const createChannel = async (req, res) => {
   try {
@@ -32,12 +33,19 @@ export const createChannel = async (req, res) => {
       description,
       profilePicture: uploadedImage.url,
       adminId,
+      members: [adminId]
     });
 
-    // Update the admin user's channels array
     await User.findByIdAndUpdate(adminId, {
       $push: { channels: channel._id }
     });
+
+await Alchan.findByIdAndUpdate(
+  alchanId,
+  {
+    $push: { channelarray: channel._id }
+  }
+);
 
     return res.status(201).json(
       new ApiResponse(201, channel, "Channel created successfully")
