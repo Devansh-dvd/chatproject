@@ -54,17 +54,15 @@ const socketHandler = (io) => {
             try {
 
                 const savedMessage = await Message.create({
-
                     channelId: data.channelId,
-
-                    sender: data.sender,
-
-                    text: data.text
+                    senderId: data.senderId,
+                    messageType: data.messageType || "text",
+                    message: data.message
                 });
 
                 const populatedMessage =
                     await Message.findById(savedMessage._id)
-                    .populate("sender");
+                    .populate("senderId", "username ProfilePicture tags");
 
                 io.to(data.channelId).emit(
                     "receive_message",
@@ -119,17 +117,10 @@ const socketHandler = (io) => {
 
                 const updatedMessage =
                     await Message.findByIdAndUpdate(
-
                         data.messageId,
-
-                        {
-                            text: data.newText
-                        },
-
-                        {
-                            new: true
-                        }
-                    );
+                        { message: data.newMessage },
+                        { new: true }
+                    ).populate("senderId", "username ProfilePicture tags");
 
                 io.emit(
                     "message_edited",

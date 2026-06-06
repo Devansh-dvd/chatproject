@@ -1,9 +1,8 @@
-import router from "express";
-import {createChannel} from "../controllers/channel.controller.js";
-import {upload} from "../middlewares/multer.middleware.js";
-import { getChannelById } from "../controllers/channel.controller.js";
+import { Router } from "express";
+import { createChannel, getChannelById, getChannelMessages } from "../controllers/channel.controller.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
-const channelRouter = router();
+const channelRouter = Router();
 
 channelRouter.route("/createchannel").post(
   upload.single("groupicon"),
@@ -11,5 +10,6 @@ channelRouter.route("/createchannel").post(
 );
 
 channelRouter.route("/getchannel/:id").get(getChannelById);
+channelRouter.route("/messages/:id").get(getChannelMessages);
 
 export default channelRouter;

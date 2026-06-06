@@ -1,4 +1,5 @@
 import {Channel} from "../models/channels.models.js"
+import { Message } from "../models/messages.models.js"
 import { uploadoncloudinary } from "../utils/cloudinary.js"
 import ApiError from "../apierror.js"
 import ApiResponse from "../apiresponse.js" 
@@ -75,4 +76,21 @@ export const getChannelById = async (req, res) => {
       new ApiError(500, "Failed to retrieve channel")
     );
   } 
+};
+
+export const getChannelMessages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const messages = await Message.find({ channelId: id })
+      .populate("senderId", "username ProfilePicture tags")
+      .sort({ createdAt: 1 });
+
+    return res.status(200).json(
+      new ApiResponse(200, messages, "Messages retrieved successfully")
+    );
+  } catch (error) {
+    return res.status(500).json(
+      new ApiError(500, "Failed to retrieve messages")
+    );
+  }
 };
