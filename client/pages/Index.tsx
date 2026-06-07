@@ -149,6 +149,7 @@ export default function Index() {
       // Auto-fill admin ID with logged-in user's ID
       setChannelData((prev) => ({ ...prev, admin: data.data.user._id }));
       alert("Login successful!");
+      localStorage.setItem("userid", data.data.user._id);
     } catch (error) {
       alert("Invalid Credentials");
       console.log("Error:", error);
