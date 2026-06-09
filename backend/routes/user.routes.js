@@ -4,14 +4,14 @@ import {upload} from '../middlewares/multer.middleware.js';
 
 const router = Router();
 
-router.route("/registeruser").post(
+router.post("/registeruser", 
   upload.single("profilePic"),
   registerUser
 );
 
 router.route("/loginuser").post(loginUser);
 
-router.route("/currentuser").get(getCurrentUser);
+router.post("/currentuser", getCurrentUser);
 
 router.route("/updateprofilepicture").put(updateProfilePicture);
 

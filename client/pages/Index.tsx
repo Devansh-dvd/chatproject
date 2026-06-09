@@ -11,7 +11,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef , useEffect } from "react";
 import { Link } from "react-router-dom";
 
 export default function Index() {
@@ -74,6 +74,33 @@ export default function Index() {
     const file = e.target.files?.[0] || null;
     setChannelData((prev) => ({ ...prev, groupicon: file }));
   };
+
+
+useEffect(() => {
+  const fetchUser = async () => {
+    const id = localStorage.getItem("userid");
+
+    if (!id) return;
+
+    try {
+      const res = await fetch("http://localhost:8000/api/users/currentuser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userid: id }),
+      });
+
+      const data = await res.json();
+      console.log(data);
+      setUser(data.user);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchUser();
+}, []);
 
   // --- Submit handlers ---
   const handleProfileSubmit = async () => {

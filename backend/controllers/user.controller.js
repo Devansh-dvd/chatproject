@@ -110,8 +110,12 @@ const loginUser = async (req, res) => {
 };
 
 const getCurrentUser = async (req, res) => {
+  const { userid } = req.body;
+
+  const user = await User.findById(userid).select("-password -refreshToken");
+
   return res.status(200).json(
-    new ApiResponse(200, req.user, "Current user fetched successfully")
+    new ApiResponse(200, user, "Current user fetched successfully")
   );
 };
 
