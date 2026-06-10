@@ -93,7 +93,7 @@ useEffect(() => {
 
       const data = await res.json();
       console.log(data);
-      setUser(data.user);
+      setUser(data.data);
     } catch (err) {
       console.error(err);
     }
