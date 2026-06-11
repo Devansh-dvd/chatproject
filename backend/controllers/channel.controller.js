@@ -10,6 +10,9 @@ export const createChannel = async (req, res) => {
   try {
    const { channelname: name, description, admin: adminId } = req.body;
 
+   console.log(name, description, adminId);
+   console.log("damnn");
+
     if (!name || !description || !adminId) {
       return res.status(400).json({
         success: false,

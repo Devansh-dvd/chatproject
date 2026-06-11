@@ -3,6 +3,7 @@ import { Zap, ArrowLeft } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+
 export default function MyChannels() {
   const location = useLocation();
 
@@ -23,6 +24,7 @@ export default function MyChannels() {
         chray.map((id: string) => getchannel(id))
       );
       setChannelsData(results);
+      console.log(channelsData);
     };
 
     if (chray.length > 0) fetchAll();

@@ -191,12 +191,12 @@ useEffect(() => {
 
     const formData = new FormData();
     formData.append("channelname", channelData.channelname);
-    formData.append("admin", channelData.admin);
+    formData.append("admin", user?._id || "");
     formData.append("description", channelData.description);
     if (channelData.groupicon) {
       formData.append("groupicon", channelData.groupicon);
     }
-
+    console.log(formData.get("channelname"), formData.get("admin"), formData.get("description"));
     try {
       const res = await fetch("http://localhost:8000/api/channel/createchannel", {
         method: "POST",
@@ -368,7 +368,7 @@ useEffect(() => {
           <button
             className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
             onClick={() => {
-              if (!userlogin) {
+              if (!user) {
                 alert("Please login first to create a channel");
                 setIsProfileModalOpen(true);
                 return;
@@ -548,10 +548,9 @@ useEffect(() => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Admin ID</label>
                 <input
                   type="text"
-                  name="adminId"
-                  value={channelData.admin}
+                  name="admin"
+                  value={`${user?._id}`}
                   readOnly
-                  placeholder="Auto-filled from your account"
                   className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/30 border border-green-500/10 text-gray-400 placeholder-gray-600 cursor-not-allowed transition-all duration-300"
                 />
               </div>
