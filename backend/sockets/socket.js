@@ -15,6 +15,8 @@ const socketHandler = (io) => {
     });
 
     socket.on("send_message", async (data) => {
+      console.log(".....");
+      console.log("Received message data:", data);
       try {
         const message = await Message.create({
           channelId: data.channelId,
@@ -34,6 +36,7 @@ const socketHandler = (io) => {
 
     socket.on("delete_message", async (data) => {
       try {
+        console.log("Received delete message data:", data);
         const message = await Message.findById(data.messageId);
 
         if (!message)
