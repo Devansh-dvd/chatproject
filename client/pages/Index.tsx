@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState, useRef , useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Index() {
   const [user, setUser] = useState(null);
@@ -21,6 +22,8 @@ export default function Index() {
   const [isLoginMode, setIsLoginMode] = useState(false);
   const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
   const [userlogin, setUserLogin] = useState(false);
+
+  const navigate = useNavigate();
 
   const [profileData, setProfileData] = useState({
     username: "",
@@ -361,10 +364,20 @@ useEffect(() => {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 mt-8 sm:mt-10 animate-fade-in" style={{ animationDelay: "1.2s" }}>
-          <button className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg border border-green-500/30 bg-green-500/10 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/20 hover:border-green-500/50 transition-all duration-300 backdrop-blur-sm">
-            <LogIn className="w-4 sm:w-5 h-4 sm:h-5" />
-            Join Channel
-          </button>
+<button
+  onClick={() => {
+    if (!user) {
+      alert("Please login first");
+      setIsProfileModalOpen(true);
+      return;
+    }
+    navigate("/search-channels");  // ← fix this
+  }}
+  className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg border border-green-500/30 bg-green-500/10 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/20 hover:border-green-500/50 transition-all duration-300 backdrop-blur-sm"
+>
+  <LogIn className="w-4 sm:w-5 h-4 sm:h-5" />
+  Join Channel
+</button>
           <button
             className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
             onClick={() => {

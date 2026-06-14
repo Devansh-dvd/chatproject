@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import MyChannels from "./pages/MyChannels";
+import SearchChannels from "./pages/SearchChannels";  // ← add this
 const Chat = React.lazy(() => import("./pages/Chat"));
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/my-channels" element={<MyChannels />} />
+          <Route path="/search-channels" element={<SearchChannels />} />  {/* ← add this */}
           <Route path="/chat/:channelId" element={<Suspense fallback={<div className="h-screen bg-black" />}><Chat /></Suspense>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
