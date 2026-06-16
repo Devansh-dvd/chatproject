@@ -3,12 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { SparklingBackground } from "@/components/sparkling-background";
 import { ArrowLeft, Search, Users, LogIn, Check } from "lucide-react";
 
+
 export default function SearchChannels() {
   const [query, setQuery] = useState("");
   const [channels, setChannels] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [requestedIds, setRequestedIds] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -133,10 +135,13 @@ export default function SearchChannels() {
 
                 {/* Action Button */}
                 {channel.isMember ? (
-                  <span className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 text-xs font-semibold">
+                  <button
+                    onClick={() => navigate(`/chat/${channel._id}`)}  // ← updated
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 text-xs font-semibold transition"
+                  >
                     <Check className="w-3 h-3" />
-                    Joined
-                  </span>
+                    Open Chat
+                  </button>
                 ) : alreadyRequested ? (
                   <span className="px-3 py-1.5 rounded-lg bg-yellow-500/20 text-yellow-400 text-xs font-semibold">
                     Requested
