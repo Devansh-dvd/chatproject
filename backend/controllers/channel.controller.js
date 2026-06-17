@@ -8,10 +8,7 @@ import { Alchan } from "../models/alchan.models.js";
 
 export const createChannel = async (req, res) => {
   try {
-   const { channelname: name, description, admin: adminId } = req.body;
-
-   console.log(name, description, adminId);
-   console.log("damnn");
+    const { channelname: name, description, admin: adminId } = req.body;
 
     if (!name || !description || !adminId) {
       return res.status(400).json({
@@ -20,17 +17,16 @@ export const createChannel = async (req, res) => {
       });
     }
 
-     if (!req.file) {
-    throw new ApiError(400, "Profile picture is required");
-  }
+    if (!req.file) {
+      throw new ApiError(400, "Profile picture is required");
+    }
 
     const profilePicPath = req.file.path;
-
     const uploadedImage = await uploadoncloudinary(profilePicPath);
 
     if (!uploadedImage?.url) {
-        throw new ApiError(500, "Image upload failed");
-      }
+      throw new ApiError(500, "Image upload failed");
+    }
 
     const channel = await Channel.create({
       name,
@@ -44,17 +40,13 @@ export const createChannel = async (req, res) => {
       $push: { channels: channel._id }
     });
 
-await Alchan.findByIdAndUpdate(
-  alchanId,
-  {
-    $push: { channelarray: channel._id }
-  }
-);
+    // removed broken Alchan update block
 
     return res.status(201).json(
       new ApiResponse(201, channel, "Channel created successfully")
     );
   } catch (error) {
+    console.error(error); // ← add this to actually see future errors
     return res.status(500).json(
       new ApiError(500, "Channel creation failed")
     );

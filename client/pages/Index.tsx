@@ -11,19 +11,19 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useState, useRef , useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Index() {
-  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(false);
   const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
   const [userlogin, setUserLogin] = useState(false);
-
-  const navigate = useNavigate();
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
   const [profileData, setProfileData] = useState({
     username: "",
@@ -46,9 +46,7 @@ export default function Index() {
   const toggleMusic = () => {
     if (audioRef.current) {
       if (isMuted) {
-        audioRef.current.play().catch(() => {
-          console.log("Autoplay blocked by browser");
-        });
+        audioRef.current.play().catch(() => console.log("Autoplay blocked"));
       } else {
         audioRef.current.pause();
       }
@@ -56,7 +54,6 @@ export default function Index() {
     }
   };
 
-  // --- Profile handlers ---
   const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData((prev) => ({ ...prev, [name]: value }));
@@ -67,7 +64,6 @@ export default function Index() {
     setProfileData((prev) => ({ ...prev, profilePic: file }));
   };
 
-  // --- Channel handlers ---
   const handleChannelInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setChannelData((prev) => ({ ...prev, [name]: value }));
@@ -78,65 +74,79 @@ export default function Index() {
     setChannelData((prev) => ({ ...prev, groupicon: file }));
   };
 
+  // Fetch current user
+  useEffect(() => {
+    const fetchUser = async () => {
+      const id = localStorage.getItem("userid");
+      if (!id) return;
+      try {
+        const res = await fetch("http://localhost:8000/api/users/currentuser", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userid: id }),
+        });
+        const data = await res.json();
+        setUser(data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchUser();
+  }, []);
 
-useEffect(() => {
-  const fetchUser = async () => {
-    const id = localStorage.getItem("userid");
+  // Fetch pending requests when user is loaded
+  useEffect(() => {
+    const fetchPendingRequests = async () => {
+      if (!user?._id) return;
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/channel/pendingrequests/${user._id}`
+        );
+        const data = await res.json();
+        setPendingRequests(data.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchPendingRequests();
+  }, [user]);
 
-    if (!id) return;
-
+  // Accept or reject request
+  const handleRequest = async (requestId: string, action: "accepted" | "rejected") => {
     try {
-      const res = await fetch("http://localhost:8000/api/users/currentuser", {
+      const res = await fetch("http://localhost:8000/api/channel/handlerequest", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userid: id }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId, action }),
       });
 
-      const data = await res.json();
-      console.log(data);
-      setUser(data.data);
+      if (!res.ok) return;
+
+      // Remove from list after handling
+      setPendingRequests((prev) => prev.filter((r) => r._id !== requestId));
     } catch (err) {
       console.error(err);
     }
   };
 
-  fetchUser();
-}, []);
-
-  // --- Submit handlers ---
   const handleProfileSubmit = async () => {
-    if (
-      !profileData.username ||
-      !profileData.password ||
-      !profileData.profilePic ||
-      !profileData.tag
-    ) {
+    if (!profileData.username || !profileData.password || !profileData.profilePic || !profileData.tag) {
       alert("All details must be filled");
       return;
     }
-
     const formData = new FormData();
     formData.append("username", profileData.username);
     formData.append("password", profileData.password);
     formData.append("tag", profileData.tag);
     formData.append("profilePic", profileData.profilePic);
-
     try {
       const res = await fetch("http://localhost:8000/api/users/registeruser", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Something went wrong");
-        return;
-      }
-
+      if (!res.ok) { alert(data.message || "Something went wrong"); return; }
       localStorage.setItem("userid", data.data.user._id);
       setUser(data.data.user);
       setIsProfileModalOpen(false);
@@ -153,36 +163,24 @@ useEffect(() => {
       alert("Username and password are required");
       return;
     }
-
     try {
       const res = await fetch("http://localhost:8000/api/users/loginuser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: profileData.username,
-          password: profileData.password,
-        }),
+        body: JSON.stringify({ username: profileData.username, password: profileData.password }),
         credentials: "include",
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Login failed");
-        return;
-      }
-
+      if (!res.ok) { alert(data.message || "Login failed"); return; }
       setIsProfileModalOpen(false);
       setProfileData({ username: "", password: "", profilePic: null, tag: "" });
       setUser(data.data.user);
       setUserLogin(true);
-      // Auto-fill admin ID with logged-in user's ID
       setChannelData((prev) => ({ ...prev, admin: data.data.user._id }));
       alert("Login successful!");
       localStorage.setItem("userid", data.data.user._id);
     } catch (error) {
       alert("Invalid Credentials");
-      console.log("Error:", error);
     }
   };
 
@@ -191,35 +189,24 @@ useEffect(() => {
       alert("Channel name and description are required");
       return;
     }
-
     const formData = new FormData();
     formData.append("channelname", channelData.channelname);
     formData.append("admin", user?._id || "");
     formData.append("description", channelData.description);
-    if (channelData.groupicon) {
-      formData.append("groupicon", channelData.groupicon);
-    }
-    console.log(formData.get("channelname"), formData.get("admin"), formData.get("description"));
+    if (channelData.groupicon) formData.append("groupicon", channelData.groupicon);
     try {
       const res = await fetch("http://localhost:8000/api/channel/createchannel", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to create channel");
-        return;
-      }
-
+      if (!res.ok) { alert(data.message || "Channel created successfully"); return; }
       setIsChannelModalOpen(false);
       setChannelData({ channelname: "", admin: user?._id || "", groupicon: null, description: "" });
       alert("Channel created successfully!");
-      user && setUser({...user,channels: [...(user.channels || []), data.data.channel._id]});
-    } 
-    catch (error) {
+      user && setUser({ ...user, channels: [...(user.channels || []), data.data.channel._id] });
+    } catch (error) {
       console.log("Error:", error);
     }
   };
@@ -228,11 +215,7 @@ useEffect(() => {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
       <SparklingBackground />
 
-      <audio
-        ref={audioRef}
-        loop
-        src="https://cdn.builder.io/o/assets%2F3bd81cf128ad492aa0b05e212b6311e3%2F72c8f55ba0c345df82ee8e64a3039069?alt=media&token=7d2be1e4-81a4-4ff0-a3a6-8ace6ad34538&apiKey=3bd81cf128ad492aa0b05e212b6311e3"
-      />
+      <audio ref={audioRef} loop src="https://cdn.builder.io/o/assets%2F3bd81cf128ad492aa0b05e212b6311e3%2F72c8f55ba0c345df82ee8e64a3039069?alt=media&token=7d2be1e4-81a4-4ff0-a3a6-8ace6ad34538&apiKey=3bd81cf128ad492aa0b05e212b6311e3" />
 
       {/* Navbar */}
       <nav className="relative z-20 px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between max-w-7xl mx-auto animate-in fade-in slide-in-from-top duration-700">
@@ -244,27 +227,86 @@ useEffect(() => {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <Link to="/my-channels" className="hidden sm:inline-block px-3 sm:px-4 py-2 text-gray-300 hover:text-white hover:bg-green-500/10 rounded-lg transition-all duration-300 font-medium text-sm"
-          state={{ user }}
-          >
+          <Link to="/my-channels" state={{ user }} className="hidden sm:inline-block px-3 sm:px-4 py-2 text-gray-300 hover:text-white hover:bg-green-500/10 rounded-lg transition-all duration-300 font-medium text-sm">
             My Channels
           </Link>
-          <button className="relative p-2.5 text-gray-300 hover:text-white hover:bg-green-500/10 rounded-lg transition-all duration-300">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-          </button>
-          <button
-            onClick={toggleMusic}
-            className={`p-2.5 rounded-lg transition-all duration-300 ${
-              isMuted ? "text-gray-300 hover:text-white hover:bg-green-500/10" : "text-green-300 bg-green-500/10"
-            }`}
-          >
+
+          {/* ========== BELL BUTTON ========== */}
+          <div className="relative">
+            <button
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              className="relative p-2.5 text-gray-300 hover:text-white hover:bg-green-500/10 rounded-lg transition-all duration-300"
+            >
+              <Bell className="w-5 h-5" />
+              {pendingRequests.length > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-green-400 rounded-full text-black text-[9px] font-bold flex items-center justify-center">
+                  {pendingRequests.length}
+                </span>
+              )}
+            </button>
+
+            {/* Notification Dropdown */}
+            {isNotifOpen && (
+              <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-green-500/20 rounded-xl shadow-2xl shadow-black/50 z-50 overflow-hidden">
+                <div className="px-4 py-3 border-b border-green-500/10">
+                  <h3 className="text-white font-semibold text-sm">Join Requests</h3>
+                  <p className="text-gray-400 text-xs">{pendingRequests.length} pending</p>
+                </div>
+
+                <div className="max-h-80 overflow-y-auto">
+                  {pendingRequests.length === 0 ? (
+                    <p className="text-center text-gray-400 text-xs py-6">No pending requests</p>
+                  ) : (
+                    pendingRequests.map((req) => (
+                      <div key={req._id} className="px-4 py-3 border-b border-green-500/5 hover:bg-green-500/5 transition">
+                        <div className="flex items-center gap-3 mb-2">
+                          {/* User Avatar */}
+                          <div className="w-8 h-8 rounded-full overflow-hidden border border-green-500/30 flex-shrink-0">
+                            {req.userId?.ProfilePicture ? (
+                              <img src={req.userId.ProfilePicture} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-green-500/20 flex items-center justify-center text-xs text-green-400 font-semibold">
+                                {req.userId?.username?.[0]?.toUpperCase() || "?"}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-xs font-semibold truncate">{req.userId?.username}</p>
+                            <p className="text-gray-400 text-xs truncate">wants to join <span className="text-green-400">{req.channelId?.name}</span></p>
+                          </div>
+                        </div>
+
+                        {/* Accept / Reject buttons */}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleRequest(req._id, "accepted")}
+                            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 text-xs font-semibold transition"
+                          >
+                            <Check className="w-3 h-3" />
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleRequest(req._id, "rejected")}
+                            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 text-xs font-semibold transition"
+                          >
+                            <X className="w-3 h-3" />
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          {/* ========== END BELL ========== */}
+
+          <button onClick={toggleMusic} className={`p-2.5 rounded-lg transition-all duration-300 ${isMuted ? "text-gray-300 hover:text-white hover:bg-green-500/10" : "text-green-300 bg-green-500/10"}`}>
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </button>
-          <button
-            onClick={() => setIsProfileModalOpen(true)}
-            className="hidden md:flex items-center gap-2 p-2 hover:bg-green-500/10 rounded-lg transition-all duration-300"
-          >
+
+          <button onClick={() => setIsProfileModalOpen(true)} className="hidden md:flex items-center gap-2 p-2 hover:bg-green-500/10 rounded-lg transition-all duration-300">
             {user ? (
               <>
                 <img src={user.ProfilePicture} className="w-10 h-10 rounded-full object-cover" />
@@ -279,10 +321,8 @@ useEffect(() => {
               </>
             )}
           </button>
-          <button
-            className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
-            onClick={() => setIsProfileModalOpen(true)}
-          >
+
+          <button className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105" onClick={() => setIsProfileModalOpen(true)}>
             Get Started
           </button>
         </div>
@@ -300,11 +340,7 @@ useEffect(() => {
               { name: "Gaming", members: "2,145", color: "from-green-300 to-green-500", delay: "0.6s" },
               { name: "Music", members: "456", color: "from-teal-400 to-teal-600", delay: "0.7s" },
             ].map((ch) => (
-              <div
-                key={ch.name}
-                className="p-3 sm:p-4 rounded-lg border border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent backdrop-blur-sm hover:border-green-500/50 transition-all duration-300 group cursor-pointer animate-scale-in"
-                style={{ animationDelay: ch.delay }}
-              >
+              <div key={ch.name} className="p-3 sm:p-4 rounded-lg border border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent backdrop-blur-sm hover:border-green-500/50 transition-all duration-300 group cursor-pointer animate-scale-in" style={{ animationDelay: ch.delay }}>
                 <div className={`w-10 sm:w-12 h-10 sm:h-12 rounded-lg bg-gradient-to-br ${ch.color} mb-2 sm:mb-3 group-hover:shadow-lg group-hover:shadow-green-500/50 transition-all`} />
                 <h3 className="text-white font-semibold text-xs sm:text-sm mb-1">{ch.name}</h3>
                 <p className="text-gray-400 text-xs">{ch.members} members</p>
@@ -313,7 +349,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* My Request Status */}
+        {/* My Request Status — kept as is with dummy data */}
         <div className="mt-8 sm:mt-12 animate-slide-in-up" style={{ animationDelay: "0.8s" }}>
           <h2 className="text-lg sm:text-xl font-bold text-white mb-4">My Request Status</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -364,28 +400,20 @@ useEffect(() => {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 mt-8 sm:mt-10 animate-fade-in" style={{ animationDelay: "1.2s" }}>
-<button
-  onClick={() => {
-    if (!user) {
-      alert("Please login first");
-      setIsProfileModalOpen(true);
-      return;
-    }
-    navigate("/search-channels");  // ← fix this
-  }}
-  className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg border border-green-500/30 bg-green-500/10 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/20 hover:border-green-500/50 transition-all duration-300 backdrop-blur-sm"
->
-  <LogIn className="w-4 sm:w-5 h-4 sm:h-5" />
-  Join Channel
-</button>
+          <button
+            onClick={() => {
+              if (!user) { alert("Please login first"); setIsProfileModalOpen(true); return; }
+              navigate("/search-channels");
+            }}
+            className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg border border-green-500/30 bg-green-500/10 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/20 hover:border-green-500/50 transition-all duration-300 backdrop-blur-sm"
+          >
+            <LogIn className="w-4 sm:w-5 h-4 sm:h-5" />
+            Join Channel
+          </button>
           <button
             className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
             onClick={() => {
-              if (!user) {
-                alert("Please login first to create a channel");
-                setIsProfileModalOpen(true);
-                return;
-              }
+              if (!user) { alert("Please login first to create a channel"); setIsProfileModalOpen(true); return; }
               setIsChannelModalOpen(true);
             }}
           >
@@ -399,111 +427,44 @@ useEffect(() => {
       {isProfileModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-xl border border-green-500/30 max-w-md w-full p-6 sm:p-8 shadow-2xl shadow-green-500/20 animate-scale-in">
-            {/* Header */}
             <div className="mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                {isLoginMode ? "Welcome Back" : "Complete Your Profile"}
-              </h2>
-              <p className="text-gray-400 text-sm">
-                {isLoginMode ? "Login to your account" : "Add your profile information to get started"}
-              </p>
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">{isLoginMode ? "Welcome Back" : "Complete Your Profile"}</h2>
+              <p className="text-gray-400 text-sm">{isLoginMode ? "Login to your account" : "Add your profile information to get started"}</p>
             </div>
-
-            {/* Profile Form */}
             <div className="space-y-4 sm:space-y-5 mb-6">
-              {/* Profile Picture - Sign Up only */}
               {!isLoginMode && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Profile Picture
-                  </label>
-                  <input
-                    ref={profileFileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleProfilePicChange}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => profileFileInputRef.current?.click()}
-                    className="w-full p-3 sm:p-4 rounded-lg border-2 border-dashed border-green-500/30 hover:border-green-500/60 bg-green-500/5 hover:bg-green-500/10 transition-all duration-300 flex items-center justify-center gap-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Profile Picture</label>
+                  <input ref={profileFileInputRef} type="file" accept="image/*" onChange={handleProfilePicChange} className="hidden" />
+                  <button onClick={() => profileFileInputRef.current?.click()} className="w-full p-3 sm:p-4 rounded-lg border-2 border-dashed border-green-500/30 hover:border-green-500/60 bg-green-500/5 hover:bg-green-500/10 transition-all duration-300 flex items-center justify-center gap-2">
                     <User className="w-5 h-5 text-green-400" />
-                    <span className="text-gray-300 text-sm">
-                      {profileData.profilePic ? profileData.profilePic.name : "Choose Image"}
-                    </span>
+                    <span className="text-gray-300 text-sm">{profileData.profilePic ? profileData.profilePic.name : "Choose Image"}</span>
                   </button>
                 </div>
               )}
-
-              {/* Username */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                <input
-                  type="text"
-                  name="username"
-                  value={profileData.username}
-                  onChange={handleProfileInputChange}
-                  placeholder="Enter your username"
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
-                />
+                <input type="text" name="username" value={profileData.username} onChange={handleProfileInputChange} placeholder="Enter your username" className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300" />
               </div>
-
-              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={profileData.password}
-                  onChange={handleProfileInputChange}
-                  placeholder="Enter your password"
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
-                />
+                <input type="password" name="password" value={profileData.password} onChange={handleProfileInputChange} placeholder="Enter your password" className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300" />
               </div>
-
-              {/* Tag - Sign Up only */}
               {!isLoginMode && (
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Tag</label>
-                  <input
-                    type="text"
-                    name="tag"
-                    value={profileData.tag}
-                    onChange={handleProfileInputChange}
-                    placeholder="Enter your tag (e.g., @developer)"
-                    className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
-                  />
+                  <input type="text" name="tag" value={profileData.tag} onChange={handleProfileInputChange} placeholder="Enter your tag (e.g., @developer)" className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300" />
                 </div>
               )}
             </div>
-
-            {/* Buttons */}
             <div className="flex gap-3 mb-4">
-              <button
-                onClick={() => setIsProfileModalOpen(false)}
-                className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg border border-green-500/30 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/10 transition-all duration-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={isLoginMode ? loginprofile : handleProfileSubmit}
-                className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
-              >
-                {isLoginMode ? "Login" : "Sign Up"}
-              </button>
+              <button onClick={() => setIsProfileModalOpen(false)} className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg border border-green-500/30 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/10 transition-all duration-300">Cancel</button>
+              <button onClick={isLoginMode ? loginprofile : handleProfileSubmit} className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105">{isLoginMode ? "Login" : "Sign Up"}</button>
             </div>
-
-            {/* Toggle Link */}
             <div className="text-center">
               <p className="text-gray-400 text-sm">
                 {isLoginMode ? "Don't have an account? " : "Already have an account? "}
-                <button
-                  onClick={() => setIsLoginMode(!isLoginMode)}
-                  className="text-green-400 hover:text-green-300 font-semibold transition-colors duration-300"
-                >
-                  {isLoginMode ? "Sign Up" : "Login"}
-                </button>
+                <button onClick={() => setIsLoginMode(!isLoginMode)} className="text-green-400 hover:text-green-300 font-semibold transition-colors duration-300">{isLoginMode ? "Sign Up" : "Login"}</button>
               </p>
             </div>
           </div>
@@ -514,88 +475,35 @@ useEffect(() => {
       {isChannelModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-xl border border-green-500/30 max-w-md w-full p-6 sm:p-8 shadow-2xl shadow-green-500/20 animate-scale-in">
-            {/* Header */}
             <div className="mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Create a Channel</h2>
               <p className="text-gray-400 text-sm">Set up your new channel</p>
             </div>
-
-            {/* Channel Form */}
             <div className="space-y-4 sm:space-y-5 mb-6">
-              {/* Group Icon */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Group Icon</label>
-                <input
-                  ref={channelFileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleGroupIconChange}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => channelFileInputRef.current?.click()}
-                  className="w-full p-3 sm:p-4 rounded-lg border-2 border-dashed border-green-500/30 hover:border-green-500/60 bg-green-500/5 hover:bg-green-500/10 transition-all duration-300 flex items-center justify-center gap-2"
-                >
+                <input ref={channelFileInputRef} type="file" accept="image/*" onChange={handleGroupIconChange} className="hidden" />
+                <button onClick={() => channelFileInputRef.current?.click()} className="w-full p-3 sm:p-4 rounded-lg border-2 border-dashed border-green-500/30 hover:border-green-500/60 bg-green-500/5 hover:bg-green-500/10 transition-all duration-300 flex items-center justify-center gap-2">
                   <User className="w-5 h-5 text-green-400" />
-                  <span className="text-gray-300 text-sm">
-                    {channelData.groupicon ? channelData.groupicon.name : "Choose Image"}
-                  </span>
+                  <span className="text-gray-300 text-sm">{channelData.groupicon ? channelData.groupicon.name : "Choose Image"}</span>
                 </button>
               </div>
-
-              {/* Channel Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Channel Name</label>
-                <input
-                  type="text"
-                  name="channelname"
-                  value={channelData.channelname}
-                  onChange={handleChannelInputChange}
-                  placeholder="Enter channel name"
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
-                />
+                <input type="text" name="channelname" value={channelData.channelname} onChange={handleChannelInputChange} placeholder="Enter channel name" className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300" />
               </div>
-
-              {/* Admin ID - read only, auto-filled from logged in user */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Admin ID</label>
-                <input
-                  type="text"
-                  name="admin"
-                  value={`${user?._id}`}
-                  readOnly
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/30 border border-green-500/10 text-gray-400 placeholder-gray-600 cursor-not-allowed transition-all duration-300"
-                />
+                <input type="text" name="admin" value={`${user?._id}`} readOnly className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/30 border border-green-500/10 text-gray-400 cursor-not-allowed transition-all duration-300" />
               </div>
-
-              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
-                <input
-                  type="text"
-                  name="description"
-                  value={channelData.description}
-                  onChange={handleChannelInputChange}
-                  placeholder="Enter channel description"
-                  className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300"
-                />
+                <input type="text" name="description" value={channelData.description} onChange={handleChannelInputChange} placeholder="Enter channel description" className="w-full px-4 py-2.5 sm:py-3 rounded-lg bg-gray-800/50 border border-green-500/20 text-white placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-gray-800/80 transition-all duration-300" />
               </div>
             </div>
-
-            {/* Buttons */}
             <div className="flex gap-3">
-              <button
-                onClick={() => setIsChannelModalOpen(false)}
-                className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg border border-green-500/30 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/10 transition-all duration-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleChannelSubmit}
-                className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105"
-              >
-                Create
-              </button>
+              <button onClick={() => setIsChannelModalOpen(false)} className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg border border-green-500/30 text-green-300 font-semibold text-sm sm:text-base hover:bg-green-500/10 transition-all duration-300">Cancel</button>
+              <button onClick={handleChannelSubmit} className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-black font-semibold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 hover:scale-105">Create</button>
             </div>
           </div>
         </div>
