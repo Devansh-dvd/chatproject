@@ -74,7 +74,7 @@ export default function Index() {
     setChannelData((prev) => ({ ...prev, groupicon: file }));
   };
 
-  // Fetch current user
+
   useEffect(() => {
     const fetchUser = async () => {
       const id = localStorage.getItem("userid");
@@ -94,7 +94,7 @@ export default function Index() {
     fetchUser();
   }, []);
 
-  // Fetch pending requests when user is loaded
+  
   useEffect(() => {
     const fetchPendingRequests = async () => {
       if (!user?._id) return;
@@ -111,7 +111,7 @@ export default function Index() {
     fetchPendingRequests();
   }, [user]);
 
-  // Accept or reject request
+  
   const handleRequest = async (requestId: string, action: "accepted" | "rejected") => {
     try {
       const res = await fetch("http://localhost:8000/api/channel/handlerequest", {
@@ -122,7 +122,7 @@ export default function Index() {
 
       if (!res.ok) return;
 
-      // Remove from list after handling
+    
       setPendingRequests((prev) => prev.filter((r) => r._id !== requestId));
     } catch (err) {
       console.error(err);
@@ -217,7 +217,6 @@ export default function Index() {
 
       <audio ref={audioRef} loop src="https://cdn.builder.io/o/assets%2F3bd81cf128ad492aa0b05e212b6311e3%2F72c8f55ba0c345df82ee8e64a3039069?alt=media&token=7d2be1e4-81a4-4ff0-a3a6-8ace6ad34538&apiKey=3bd81cf128ad492aa0b05e212b6311e3" />
 
-      {/* Navbar */}
       <nav className="relative z-20 px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between max-w-7xl mx-auto animate-in fade-in slide-in-from-top duration-700">
         <div className="flex items-center gap-1 sm:gap-2">
           <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/50">
@@ -231,7 +230,6 @@ export default function Index() {
             My Channels
           </Link>
 
-          {/* ========== BELL BUTTON ========== */}
           <div className="relative">
             <button
               onClick={() => setIsNotifOpen(!isNotifOpen)}
@@ -245,7 +243,6 @@ export default function Index() {
               )}
             </button>
 
-            {/* Notification Dropdown */}
             {isNotifOpen && (
               <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-green-500/20 rounded-xl shadow-2xl shadow-black/50 z-50 overflow-hidden">
                 <div className="px-4 py-3 border-b border-green-500/10">
@@ -276,7 +273,6 @@ export default function Index() {
                           </div>
                         </div>
 
-                        {/* Accept / Reject buttons */}
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleRequest(req._id, "accepted")}
@@ -300,7 +296,6 @@ export default function Index() {
               </div>
             )}
           </div>
-          {/* ========== END BELL ========== */}
 
           <button onClick={toggleMusic} className={`p-2.5 rounded-lg transition-all duration-300 ${isMuted ? "text-gray-300 hover:text-white hover:bg-green-500/10" : "text-green-300 bg-green-500/10"}`}>
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -328,7 +323,6 @@ export default function Index() {
         </div>
       </nav>
 
-      {/* Top Channels Section */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-slide-in-up" style={{ animationDelay: "0.2s" }}>
         <div className="mb-6">
           <h2 className="text-lg sm:text-xl font-bold text-white mb-4">Top Channels</h2>
@@ -349,7 +343,6 @@ export default function Index() {
           </div>
         </div>
 
-        {/* My Request Status — kept as is with dummy data */}
         <div className="mt-8 sm:mt-12 animate-slide-in-up" style={{ animationDelay: "0.8s" }}>
           <h2 className="text-lg sm:text-xl font-bold text-white mb-4">My Request Status</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -398,7 +391,6 @@ export default function Index() {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 mt-8 sm:mt-10 animate-fade-in" style={{ animationDelay: "1.2s" }}>
           <button
             onClick={() => {
@@ -423,7 +415,6 @@ export default function Index() {
         </div>
       </div>
 
-      {/* ===================== PROFILE MODAL ===================== */}
       {isProfileModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-xl border border-green-500/30 max-w-md w-full p-6 sm:p-8 shadow-2xl shadow-green-500/20 animate-scale-in">
@@ -471,7 +462,6 @@ export default function Index() {
         </div>
       )}
 
-      {/* ===================== CHANNEL MODAL ===================== */}
       {isChannelModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 rounded-xl border border-green-500/30 max-w-md w-full p-6 sm:p-8 shadow-2xl shadow-green-500/20 animate-scale-in">

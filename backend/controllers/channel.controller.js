@@ -46,7 +46,7 @@ export const createChannel = async (req, res) => {
       new ApiResponse(201, channel, "Channel created successfully")
     );
   } catch (error) {
-    console.error(error); // ← add this to actually see future errors
+    console.error(error); 
     return res.status(500).json(
       new ApiError(500, "Channel creation failed")
     );
@@ -89,7 +89,7 @@ export const getChannelMessages = async (req, res) => {
     );
   }
 };
-import { RequestStatus } from "../models/requests.models.js";  // ← add this import at top
+import { RequestStatus } from "../models/requests.models.js";
 
 // Search channels by name
 export const searchChannels = async (req, res) => {
@@ -97,10 +97,9 @@ export const searchChannels = async (req, res) => {
     const { name, userId } = req.query;
 
     const channels = await Channel.find({
-      name: { $regex: name, $options: "i" }  // case insensitive search
+      name: { $regex: name, $options: "i" }  
     }).populate("adminId", "username ProfilePicture");
 
-    // for each channel tell frontend if user is already a member or not
     const result = channels.map((channel) => ({
       ...channel.toObject(),
       isMember: channel.members.some(
@@ -118,7 +117,6 @@ export const searchChannels = async (req, res) => {
   }
 };
 
-// Send join request
 export const sendJoinRequest = async (req, res) => {
   try {
     const { userId, channelId } = req.body;
@@ -131,7 +129,6 @@ export const sendJoinRequest = async (req, res) => {
       );
     }
 
-    // check if request already exists
     const existingRequest = await RequestStatus.findOne({ userId, channelId });
     if (existingRequest) {
       return res.status(400).json(
@@ -155,16 +152,13 @@ export const sendJoinRequest = async (req, res) => {
   }
 };
 
-// Get pending requests for channel owner
 export const getPendingRequests = async (req, res) => {
   try {
     const { adminId } = req.params;
 
-    // find all channels owned by this admin
     const channels = await Channel.find({ adminId });
     const channelIds = channels.map((c) => c._id);
 
-    // find all pending requests for those channels
     const requests = await RequestStatus.find({
       channelId: { $in: channelIds },
       status: "pending"
@@ -182,10 +176,9 @@ export const getPendingRequests = async (req, res) => {
   }
 };
 
-// Accept or reject request
 export const handleJoinRequest = async (req, res) => {
   try {
-    const { requestId, action } = req.body; // action = "accepted" or "rejected"
+    const { requestId, action } = req.body; 
 
     const request = await RequestStatus.findById(requestId);
     if (!request) {
@@ -195,7 +188,6 @@ export const handleJoinRequest = async (req, res) => {
     request.status = action;
     await request.save();
 
-    // if accepted add user to channel members
     if (action === "accepted") {
       await Channel.findByIdAndUpdate(request.channelId, {
         $push: { members: request.userId }

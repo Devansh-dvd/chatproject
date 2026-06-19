@@ -34,7 +34,7 @@ export default function MyChannels() {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
       <SparklingBackground />
 
-      {/* Navbar */}
+
       <nav className="relative z-20 px-6 py-6 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/50">
@@ -52,7 +52,6 @@ export default function MyChannels() {
         </Link>
       </nav>
 
-      {/* Page Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
         {/* Title */}
         <h1 className="text-3xl font-bold text-white mb-2">My Channels</h1>
@@ -60,7 +59,6 @@ export default function MyChannels() {
           Your joined and created channels will appear here.
         </p>
 
-        {/* CHANNEL GRID (FIXED) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {channelsData.length > 0 ? (
             channelsData.map((channelData: any) => (

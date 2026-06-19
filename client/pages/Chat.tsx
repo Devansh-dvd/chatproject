@@ -16,7 +16,7 @@ export default function Chat() {
   const [user, setUser] = useState<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Fetch current user
+  
   useEffect(() => {
     const fetchUser = async () => {
       const id = localStorage.getItem("userid");
@@ -36,7 +36,7 @@ export default function Chat() {
     fetchUser();
   }, []);
 
-  // Fetch channel if refreshed
+  
   useEffect(() => {
     if (!channel && channelId) {
       fetch(`http://localhost:8000/api/channel/getchannel/${channelId}`)
@@ -45,24 +45,24 @@ export default function Chat() {
     }
   }, [channelId]);
 
-  // Fetch old messages + join socket room
+  
   useEffect(() => {
     if (!channelId) return;
 
-    // Load existing messages from DB
+    
     fetch(`http://localhost:8000/api/messages/${channelId}`)
       .then((res) => res.json())
       .then((data) => setMessages(data.data));
 
-    // Join the socket room for this channel
+  
     socket.emit("join_channel", channelId);
 
-    // Listen for incoming messages
+    
     socket.on("receive_message", (message) => {
       setMessages((prev) => [...prev, message]);
     });
 
-    // Handle soft delete from other users
+    
     socket.on("message_deleted", ({ messageId }) => {
       setMessages((prev) =>
         prev.map((msg) =>
@@ -78,7 +78,7 @@ export default function Chat() {
     };
   }, [channelId]);
 
-  // Auto scroll to bottom
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -108,7 +108,7 @@ export default function Chat() {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white overflow-hidden">
       <SparklingBackground />
 
-      {/* TOP BAR */}
+  
       <div className="relative z-20 flex items-center justify-between px-6 py-4 border-b border-green-500/10 backdrop-blur-sm">
         <Link to="/" className="flex items-center gap-2 text-gray-300 hover:text-white">
           <ArrowLeft className="w-4 h-4" />
@@ -121,10 +121,10 @@ export default function Chat() {
         <div />
       </div>
 
-      {/* CHAT AREA */}
+    
       <div className="relative z-10 flex flex-col h-[calc(100vh-120px)] px-4 py-4">
 
-        {/* Messages */}
+        
         <div className="flex-1 overflow-y-auto space-y-3 p-2">
           {messages.map((msg, i) => {
             const isMe = msg.senderId?._id === user?._id || msg.senderId === user?._id;
@@ -136,7 +136,7 @@ export default function Chat() {
                 key={i}
                 className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}
               >
-                {/* Avatar */}
+                
                 <div className="w-8 h-8 rounded-full overflow-hidden border border-green-500/30 flex-shrink-0">
                   {profilePicture ? (
                     <img src={profilePicture} alt={username} className="w-full h-full object-cover" />
@@ -147,7 +147,7 @@ export default function Chat() {
                   )}
                 </div>
 
-                {/* Bubble */}
+            
                 <div
                   className={`max-w-[60%] w-fit p-3 rounded-xl text-sm backdrop-blur-sm group relative
                   ${isMe
